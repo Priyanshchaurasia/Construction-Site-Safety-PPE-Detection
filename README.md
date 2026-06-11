@@ -7,7 +7,5 @@ sdk: gradio
 sdk_version: 4.44.0
 app_file: app.py
 pinned: false
+python_version: 3.11
 ---
-
-# ⛑️ Construction Site PPE Safety Monitor
-Real-time hardhat detection using YOLOv8 and a violation state machine.
