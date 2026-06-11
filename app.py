@@ -47,14 +47,21 @@ def get_state(worker_id, is_unsafe):
     return ws["state"], False
 
 
+frame_counter = 0
+
 def webcam_frame(frame):
-    global alerts_log
+    global alerts_log, frame_counter
     if frame is None:
         return None, "No webcam feed"
+    
+    frame_counter += 1
+    # Only process every 5th frame to reduce load
+    if frame_counter % 5 != 0:
+        return None, "\n".join(reversed(alerts_log)) if alerts_log else "✅ No violations"
 
     frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-    frame_bgr = cv2.resize(frame_bgr, (640, 360))
-    results = model.track(frame_bgr, persist=True, verbose=False, conf=0.35, imgsz=320)
+    frame_bgr = cv2.resize(frame_bgr, (320, 180))  # smaller = faster
+    results = model.track(frame_bgr, persist=True, verbose=False, conf=0.35, imgsz=160)
     out = frame_bgr.copy()
 
     if results and results[0].boxes is not None:
@@ -72,7 +79,7 @@ def webcam_frame(frame):
             color = (0,255,0) if state=="SAFE" else (0,165,255) if state=="WARNING" else (0,0,255)
             cv2.rectangle(out, (x1,y1),(x2,y2), color, 2)
             cv2.putText(out, f"W{worker_id} {PPE_CLASSES.get(cls_id,'?')} {conf:.2f} [{state}]",
-                        (x1,y1-8), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                        (x1,y1-8), cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 2)
 
     out_rgb = cv2.cvtColor(out, cv2.COLOR_BGR2RGB)
     alert_text = "\n".join(reversed(alerts_log)) if alerts_log else "✅ No violations detected"
@@ -103,4 +110,4 @@ with gr.Blocks(title="⛑️ PPE Safety Monitor", theme=gr.themes.Soft()) as dem
     gr.Markdown("---\n**Repo:** [GitHub](https://github.com/Priyanshchaurasia/Construction_Site_PPE)")
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.queue(max_size=2).launch()
