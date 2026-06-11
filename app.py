@@ -86,30 +86,17 @@ def webcam_frame(frame):
     return out_rgb, alert_text
 
 
-with gr.Blocks(title="⛑️ PPE Safety Monitor", theme=gr.themes.Soft()) as demo:
-    gr.Markdown("""
-    # ⛑️ Construction Site PPE Safety Monitor
-    Real-time hardhat detection · YOLOv8 · Violation State Machine (SAFE → WARNING → VIOLATION)
-    """)
-
-    with gr.Row():
-        cam_input  = gr.Image(sources=["webcam"], streaming=True,
-                              label="📷 Camera Feed", scale=1)
-        cam_output = gr.Image(label="🔍 Detection Output", scale=1)
-
-    alert_box = gr.Textbox(label="🚨 Violation Log", lines=8, interactive=False,
-                           placeholder="Violations will appear here...")
-
-    cam_input.stream(
-    webcam_frame,
-    cam_input,
-    [cam_output, alert_box],
-    time_limit=60,
-    stream_every=0.5,
-    concurrency_limit=1
+demo = gr.Interface(
+    fn=webcam_frame,
+    inputs=gr.Image(sources=["webcam"], streaming=True, label="📷 Camera Feed"),
+    outputs=[
+        gr.Image(label="🔍 Detection Output"),
+        gr.Textbox(label="🚨 Violation Log", lines=8)
+    ],
+    live=True,
+    title="⛑️ Construction Site PPE Safety Monitor",
+    description="Real-time hardhat detection · YOLOv8 · Violation State Machine (SAFE → WARNING → VIOLATION)",
 )
-
-    gr.Markdown("---\n**Repo:** [GitHub](https://github.com/Priyanshchaurasia/Construction_Site_PPE)")
 
 if __name__ == "__main__":
     demo.queue().launch()
