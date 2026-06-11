@@ -86,17 +86,17 @@ def webcam_frame(frame):
     return out_rgb, alert_text
 
 
-demo = gr.Interface(
-    fn=webcam_frame,
-    inputs=gr.Image(sources=["webcam"], streaming=True, label="📷 Camera Feed"),
-    outputs=[
-        gr.Image(label="🔍 Detection Output"),
-        gr.Textbox(label="🚨 Violation Log", lines=8)
-    ],
-    live=True,
-    title="⛑️ Construction Site PPE Safety Monitor",
-    description="Real-time hardhat detection · YOLOv8 · Violation State Machine (SAFE → WARNING → VIOLATION)",
-)
+with gr.Blocks(title="⛑️ PPE Safety Monitor") as demo:
+    gr.Markdown("# ⛑️ Construction Site PPE Safety Monitor\nReal-time hardhat detection · YOLOv8 · Violation State Machine")
+
+    with gr.Row():
+        inp = gr.Image(sources=["webcam"], streaming=True, label="📷 Camera Feed")
+        out = gr.Image(label="🔍 Detection Output")
+    
+    log = gr.Textbox(label="🚨 Violation Log", lines=6)
+    
+    inp.stream(webcam_frame, [inp], [out, log],
+               time_limit=90, stream_every=0.5, concurrency_limit=2)
 
 if __name__ == "__main__":
-    demo.queue().launch()
+    demo.queue(max_size=3).launch()
