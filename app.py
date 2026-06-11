@@ -101,13 +101,14 @@ with gr.Blocks(title="⛑️ PPE Safety Monitor", theme=gr.themes.Soft()) as dem
                            placeholder="Violations will appear here...")
 
     cam_input.stream(
-    fn=webcam_frame,
-    inputs=[cam_input],
-    outputs=[cam_output, alert_box],
-    stream_every=0.1
-)
+        fn=webcam_frame,
+        inputs=[cam_input],
+        outputs=[cam_output, alert_box],
+        stream_every=0.5,
+        concurrency_limit=1
+    )
 
     gr.Markdown("---\n**Repo:** [GitHub](https://github.com/Priyanshchaurasia/Construction_Site_PPE)")
 
 if __name__ == "__main__":
-    demo.queue(max_size=2).launch()
+    demo.queue().launch()
